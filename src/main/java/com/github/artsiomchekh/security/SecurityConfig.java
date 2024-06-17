@@ -50,16 +50,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     protected void configure(HttpSecurity http) throws Exception {
-        // Enable CORS and disable CSRF
         http = http.cors().and().csrf().disable();
 
-        // Set session management to stateless
         http = http
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and();
 
-        // Set unauthorized requests exception handler
         http = http
                 .exceptionHandling()
                 .authenticationEntryPoint(
@@ -72,21 +69,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 )
                 .and();
 
-        // Set permissions on endpoints
         http.authorizeRequests()
-                .antMatchers("api/public/login", "/register").permitAll()
-                .antMatchers("/logout").permitAll()
+                .antMatchers("/api/public/**").permitAll()
+                .antMatchers("/login").permitAll()
                 // Our private endpoints
                 .anyRequest().authenticated();
 
-        // Add JWT token filter
         http.addFilterBefore(
                 jwtFilter,
                 UsernamePasswordAuthenticationFilter.class
         );
     }
 
-    // Used by Spring Security if CORS is enabled.
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source =
@@ -100,7 +94,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new CorsFilter(source);
     }
 
-    @Override @Bean
+    @Override
+    @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
